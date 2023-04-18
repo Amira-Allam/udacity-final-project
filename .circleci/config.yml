@@ -10,15 +10,16 @@ commands:
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
-  # install_ansible:
-  #   description: Install Ansible
-  #   steps:
-  #     - run:
-  #         name: Install Ansible
-  #         command: |
-  #           curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-  #           python3 get-pip.py --user
-  #           python3 -m pip install --user ansible
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common
+            sudo apt-add-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible
   # destroy_environment:
   #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
   #   parameters:
@@ -266,28 +267,28 @@ jobs:
 #             # your code here
 #       # Here's where you will add some code to rollback on failure  
 
-smoke-test:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      # - checkout
-      - run:
-          name: Backend smoke test.
-          command: |
-            export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances --region us-east-1 --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+# smoke-test:
+#     docker:
+#       - image: amazon/aws-cli
+#     steps:
+#       # - checkout
+#       - run:
+#           name: Backend smoke test.
+#           command: |
+#             export BACKEND_PUBLIC_IP=$(aws ec2 describe-instances --region us-east-1 --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
             
-            # URL="http://$BACKEND_PUBLIC_IP:3030/api/status"
-            URL="http://g00gle.com"
-            if curl -s --head ${URL}
-            then
-              echo "It worked!"
-              exit 0
-            else
-              echo "Rolling Back"
-              exit 1
-            fi
-      - notify_on_failure
-      - destroy_environment
+#             # URL="http://$BACKEND_PUBLIC_IP:3030/api/status"
+#             URL="http://g00gle.com"
+#             if curl -s --head ${URL}
+#             then
+#               echo "It worked!"
+#               exit 0
+#             else
+#               echo "Rolling Back"
+#               exit 1
+#             fi
+#       - notify_on_failure
+#       - destroy_environment
 #   cloudfront-update:
 #     docker:
 #       # Docker image here that supports AWS CLI
@@ -326,30 +327,30 @@ smoke-test:
 workflows:
   default:
     jobs:
-      # - build-frontend
-      # - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #     filters:
-      #       branches:
-      #         only: [master]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [master]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [run-migrations]
       # - deploy-backend:
       #     requires: [run-migrations]
-      - smoke-test
+      # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
