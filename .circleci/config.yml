@@ -9,20 +9,15 @@ commands:
     parameters:
       Workflow_ID:
         type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
+        default: ${CIRCLE_WORKFLOW_ID:0:5}
     steps:
       - run:
-          name: Destroy environments
+          name: Destroy environment
           when: on_fail
           command: |
-            # Empty frontend bucket
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID:0:5}
             aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
-
-            # Delete frontend stack
-            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
-
-            # Delete backend stack
-            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
+            aws cloudformation delete-stack --stack-name frontend-<< parameters.Workflow_ID >>
   notify_on_failure:
       steps:
         - slack/notify:
@@ -211,7 +206,7 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml -vv
             # ansible-playbook -i inventory.txt prometheus-exporter.yml -vv
-      - destroy_environment     
+      # Here's where you will add some code to rollback on failure      
 
   run-migrations:
     docker: 
@@ -374,7 +369,7 @@ workflows:
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       # - run-migrations
-      #     requires: [configure-infrastructure]
+          # requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [deploy-infrastructure]
       # - deploy-backend
