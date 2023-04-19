@@ -155,14 +155,14 @@ jobs:
           name: Install dependencies
           command: |
             yum install -y tar gzip
-      # - run:
-      #     name: Ensure back-end infrastructure exists
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/backend.yml \
-      #         --tags project=udapeople \
-      #         --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
-      #         --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:5}
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=udapeople \
+              --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:5}
 
       - run:
           name: Ensure front-end infrastructure exist
@@ -185,7 +185,7 @@ jobs:
       # - destroy_environment
   configure-infrastructure:
     docker:
-      - image: mareimorsy/aws-node
+      - image: amiraallam/aws-node
     steps:
       - checkout
       - add_ssh_keys:
@@ -210,7 +210,7 @@ jobs:
 
   run-migrations:
     docker: 
-      - image: mareimorsy/aws-node
+      - image: amiraallam/aws-node
 
     steps:
       - checkout
@@ -232,7 +232,7 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: mareimorsy/aws-node
+      - image: amiraallam/aws-node
     steps:
       - checkout
       - run:
@@ -252,7 +252,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: mareimorsy/aws-node
+      - image: amiraallam/aws-node
     steps:
       - checkout
       - add_ssh_keys:
@@ -306,7 +306,7 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: mareimorsy/aws-node
+      - image: amiraallam/aws-node
     steps:
       - checkout
       - run:
@@ -328,7 +328,7 @@ jobs:
 
   cleanup:
     docker:
-      - image: mareimorsy/aws-node
+      - image: amiraallam/aws-node
     steps:
       - checkout
       - run:
@@ -362,18 +362,18 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-infrastructure:
-          # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches: 
               only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-      # - run-migrations
-          # requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [deploy-infrastructure]
-      # - deploy-backend
-          # requires: [run-migrations]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [deploy-infrastructure]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
