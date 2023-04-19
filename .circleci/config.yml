@@ -196,20 +196,26 @@ jobs:
     docker:
     - image: cimg/base:stable
     steps:
-    - checkout
-    - install_ansible
-    - install_awscli
-    - add_ssh_keys:
-       fingerprints: ["68:63:36:6b:91:9e:0c:88:a3:85:71:27:83:9e:a0:52"]
-    - attach_workspace:
-        at: ~/
-    - run:
-       name: Run Configure Server Ansible play
-       command: |
-         cd .circleci/ansible
-         cat inventory.txt
-         ansible-playbook -i inventory.txt configure-server.yml
-    - destroy_environment
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["68:63:36:6b:91:9e:0c:88:a3:85:71:27:83:9e:a0:52"]
+      # - run:
+      #     name: "Install Dependencies"
+      #     command: |
+      #       apk add ansible gzip openssh-client
+      # - attach_workspace:
+      #     at: ~/
+      - run:
+          name: Configure server
+          command: |
+            ls
+            pwd
+            cd .circleci/ansible
+            aws ec2 describe-instances --region us-east-1 --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> inventory.txt
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml -vv
+            # ansible-playbook -i inventory.txt prometheus-exporter.yml -vv
+      - destroy_environment
             
 
 #   run-migrations:
