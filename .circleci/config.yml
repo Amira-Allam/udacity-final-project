@@ -16,7 +16,7 @@ commands:
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID:0:5}
-            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5} --recursive
+            aws s3 rm s3://udapeoplee-${CIRCLE_WORKFLOW_ID:0:5} --recursive
             aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID:0:5}
   notify_on_failure:
     steps:
@@ -244,7 +244,7 @@ jobs:
             npm install
             npm run build:prod
             # aws s3 sync dist s3://udapeople-project
-            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5} --recursive
+            aws s3 cp dist s3://udapeoplee-${CIRCLE_WORKFLOW_ID:0:5} --recursive
 
   #       # Here's where you will add some code to rollback on failure
 
@@ -340,7 +340,7 @@ jobs:
             echo Old Workflow ID: $OldWorkflowID 
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws s3 rm "s3://udapeoplee-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             fi
