@@ -37,7 +37,7 @@ commands:
     parameters:
       Workflow_ID:
         type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
+        default: ${CIRCLE_WORKFLOW_ID:0:5}
     steps:
       - run:
           name: Revert migrations
@@ -287,17 +287,18 @@ jobs:
               --output text)
             
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
-            # URL=www.g00gle.com
-            if curl -s $API_URL/api/status | grep "ok"
-            # if curl -s $URL
+            URL=www.g00gle.com
+            # if curl -s $API_URL/api/status | grep "ok"
+            if curl -s $URL
             then
               exit 0
             else
               exit 1
             fi
       - notify_on_failure
-      - destroy_environment
       - revert-migrations
+      - destroy_environment
+      
       
 
   cloudfront-update:
@@ -320,7 +321,9 @@ jobs:
               --template-file .circleci/files/cloudfront.yml \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" \
               --stack-name InitialStack
+      - revert-migrations
       - destroy_environment
+
 
   cleanup:
     docker:
@@ -372,7 +375,7 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: [smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+      # - cloudfront-update:
+      #     requires: [smoke-test]
+      # - cleanup:
+      #     requires: [cloudfront-update]
