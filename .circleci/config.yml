@@ -52,7 +52,7 @@ commands:
               npm install
               npm run migration:revert
             fi
-            fi
+            
             
 jobs:
 
