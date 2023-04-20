@@ -45,14 +45,13 @@ commands:
           command: |
             SUCCESS=$(curl --insecure  https://kvdb.io/${KVDB_BUCKET}/migration_<< parameters.Workflow_ID >>)
             echo "$SUCCESS"
-            export TYPEORM_HOST=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:5}" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
-            export TYPEORM_PORT=5532
             # Logic for reverting the database state
-            if [[ "${SUCCESS}" == "1" ]];
+            if (( $SUCCESS == 1 ));
             then
               cd ~/project/backend
               npm install
               npm run migration:revert
+            fi
             fi
             
 jobs:
@@ -295,9 +294,9 @@ jobs:
               --output text)
             
             export API_URL=http://${BACKEND_PUBLIC_IP}:3030
-            URL=www.g00gle.com
-            # if curl -s $API_URL/api/status | grep "ok"
-            if curl -s $URL
+            # URL=www.g00gle.com
+            if curl -s $API_URL/api/status | grep "ok"
+            # if curl -s $URL
             then
               exit 0
             else
@@ -369,21 +368,21 @@ workflows:
       #     requires: [build-backend]
       # - scan-frontend:
       #     requires: [build-frontend]
-      - deploy-infrastructure:
-          # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches: 
-              only: [master]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-           requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations]
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
+      # - deploy-infrastructure:
+      #     # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      #     filters:
+      #       branches: 
+      #         only: [master]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #      requires: [run-migrations]
+      # - deploy-backend:
+      #     requires: [run-migrations]
+      - smoke-test
+          # requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
       # - cleanup:
