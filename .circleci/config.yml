@@ -42,6 +42,13 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
+            # Install Node.js 13
+            # First: we install lts version as base
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            sudo apt install -y nodejs
+            # Then: we install n version manager to get to required version
+            sudo npm install --global n
+            sudo n 13.8.0
             SUCCESS=$(curl https://kvdb.io/${KVDB_BUCKET}/migration_<< parameters.Workflow_ID >>)
             # Revert database changes
             if [[ $SUCCESS==1 ]]
