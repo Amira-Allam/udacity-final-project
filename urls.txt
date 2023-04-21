@@ -5,5 +5,5 @@ https://github.com/Amira-Allam/udacity-final-project
 http://udapeople-9303a.s3-website-us-east-1.amazonaws.com/#/employees
 
 3. deployed and functioning front-end application in CloudFront. [URL03_SCREENSHOT]
-   http://d3k98ovubpcgdm.cloudfront.net/
+   http://d3k98ovubpcgdm.cloudfront.net/#/employees
 
